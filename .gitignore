@@ -6,9 +6,6 @@ api/0.1/include/config.php
 wgm/wgm_config.php
 wgm/iaas/wgm_db/config.ini
 
-# Ignore hide
-hide/
-
 # For Python #
 ##############
 __pycache__/
