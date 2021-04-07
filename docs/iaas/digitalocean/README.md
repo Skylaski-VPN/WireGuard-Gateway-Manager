@@ -57,4 +57,33 @@ Make sure you provide an appropriate name and copy paste your key into the appro
 This key will also be used in setting up your IaaS provider in WireGuard Gateway Manager. Provisioning it in DigitalOcean allows us to deploy servers with this key as well. 
 
 
+## WireGuard Gateway VM Image
 
+WireGuard Gateway Manager deploys servers using available images in DigitalOcean. In order for WireGuard Gateway Manager to find the appropriate image they must be named starting with `wgm_vm_image`. This way whether the image is a Custom Image or a Snapshot of an existing Droplet, WireGuard Gateway Manager will be able to find it. 
+
+To get an image ready for WireGuard Gateway Manager, in this example, we deploy an Ubuntu Droptlet, set it up for becoming a WireGuard Gateway, then shut it down and take a snapshot. We prefix the snapshot name with `wgm_vm_image` so WireGuard Gateway Manager can find it later.
+
+This guide won't go into detail on how to deploy a Droplet in DigitalOcean manually, but for a WireGuard Gateway Server we highly recommend you make the following changes before creating a snapshot image.
+
+### Update the VM
+`sudo apt update`
+`sudo apt upgrade`
+
+### Ensure IP Forwarding is enabled.
+`sudo echo "net.ipv4.ip_forward = 1" > /etc/sysctl.d/wg.conf`
+`sudo echo "net.ipv6.conf.all.forwarding = 1" >> /etc/sysctl.d/wg.conf`
+
+### Install WireGuard
+`sudo apt install wireguard`
+
+## DNS Server VM Image
+
+Setting up a fully functional DNS server is beyond the scope of this document, but it's not too difficult.
+
+Skylaski VPN uses [unbound](https://nlnetlabs.nl/projects/unbound/about/).
+
+Once you have a working DNS server image, just like above, make sure the name is prefixed with `wgm_vm_image`.
+
+----
+
+Once all 4 things are setup in your DigitalOcean environment you should be good to go with using it as an IaaS provider in WireGuard Gateway Manager.
