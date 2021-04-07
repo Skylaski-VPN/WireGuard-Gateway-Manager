@@ -73,6 +73,49 @@ Once here, the first thing you need to do is setup your IaaS provider, add an au
 
 Currently WireGuard Gateway Manager only supports DigitalOcean. Please see [this document](docs/iaas/digitalocean/README.md) on getting DigitalOcean setup for WireGuard Gateway Manager.
 
+Once DigitalOcean is ready to go create the IaaS provider in WireGuard Gateway Manager by clicking the 'IaaS Providers' link.
+![iaas](docs/screenshots/iaas1.png)
+
+Here you'll set a Name and Description as well as Type. Make sure you select DigitalOcean as the provider type. 'Other' is not supported.
+
+Once created we can move on to setting up the authentication configuration.
+
+Click 'HOME' or navigate back to `/wgm/` in your web browser and you'll see the 'Add Auth Config' link is now active. 
+
+Click 'Add Auth Config' to setup authentication for this provider's API.
+
+![auth-config](docs/screenshots/iaas2.png)
+
+Here you *MUST* fill out a Name and Description as well as 'Auth Key0' which is your DigitalOcean API token created earlier. 
+
+'SSH Key0' *MUST* also be provided. Make sure this is a Public SSH Key that has been setup in your DigitalOcean environment as well. 
+
+When you go to add an Auth Config, WireGuard Gateway Manager will test your tokens and keys to make sure their valid. 
+
+![authtest](docs/screenshots/iaas3.png)
+
+Once a proper Auth Config has been setup, we need to download the available Zones and Images for this IaaS Provider. 
+
+Navigate back to 'HOME' and you'll see the 'Setup Provider' link is enabled.
+
+![setupiaas](docs/screenshots/iaas4.png)
+
+Click 'Update Zones' to download a list of available zones for this provider.
+
+Click 'Update Images' to download a list of available images for this provider. 
+
+Click 'HOME' to go back to the main page. 
+
+Now you'll notice the Zones and VM Images links are both available. You can confirm the list of Zones by clicking that link, but let's jump over to our VM Images.
+
+![images](docs/screenshots/iaas5.png)
+
+Here is where we will identify which images are DNS servers and which ones are WireGuard Gateway Servers.
+
+You'll need to update the type and description for at least 1 of each (Gateway & DNS) to continue. 
+
+Once you've done that, your IaaS Provider is ready to rock and roll. 
+
 ### Setup DNS Provider
 
 ### Check Config Templates
