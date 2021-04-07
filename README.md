@@ -2,6 +2,8 @@
 - [About](#About)
 - [Dependencies](#Dependencies)
 - [Install](#Install)
+	- [Get WireGuard Gateway Manager](#Get WireGuard Gateway Manager)
+	- [Setup Database](#Setup Database)
 
 ## About
 WireGuard Gateway Manager is a web app for deploying and managing WireGuard Gateway's and Clients
@@ -18,7 +20,7 @@ WireGuard Gateway Manager is a web app for deploying and managing WireGuard Gate
 
 *In order for WireGuard Gateway Manager to interact with the gateway servers, the webserver must run as a user with a `/home/` directory and a pair of SSH keys setup in `~/.ssh/`.*
 
-### Extract Tarball
+### Get WireGuard Gateway Manager
 First extract the tarball to a working webdirectory. 
 
 `tar -xvf [WGM_RELEASE].tar.bz2`
