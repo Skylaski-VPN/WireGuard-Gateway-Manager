@@ -71,6 +71,8 @@ Browse over to your webapp making sure to point your browser to the `wgm` direct
 ### Setup IaaS Provider
 Once here, the first thing you need to do is setup your IaaS provider, add an auth config for authenticating with your providers API and download the list of available zones and virtual machine images.
 
+Currently WireGuard Gateway Manager only supports DigitalOcean. Please see [this document](docs/iaas/digitalocean/README.md) on getting DigitalOcean setup for WireGuard Gateway Manager.
+
 ### Setup DNS Provider
 
 ### Check Config Templates
