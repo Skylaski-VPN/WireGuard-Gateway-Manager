@@ -1,0 +1,10 @@
+/* WGM Console Stylesheet */
+
+a.disabled {
+    pointer-events: none;
+    color: #ccc;
+}
+
+a.enabled {
+	color: #aa0000;
+}
