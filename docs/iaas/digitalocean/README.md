@@ -80,6 +80,8 @@ sudo echo "net.ipv6.conf.all.forwarding = 1" >> /etc/sysctl.d/wg.conf
 ### Install WireGuard
 `sudo apt install wireguard`
 
+*Be sure to make your images available in all zones you plan to deploy to!*
+
 ## DNS Server VM Image
 
 Setting up a fully functional DNS server is beyond the scope of this document, but it's not too difficult.
