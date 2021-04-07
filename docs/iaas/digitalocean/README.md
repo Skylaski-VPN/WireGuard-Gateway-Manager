@@ -66,12 +66,16 @@ To get an image ready for WireGuard Gateway Manager, in this example, we deploy 
 This guide won't go into detail on how to deploy a Droplet in DigitalOcean manually, but for a WireGuard Gateway Server we highly recommend you make the following changes before creating a snapshot image.
 
 ### Update the VM
-`sudo apt update`
-`sudo apt upgrade`
+```
+sudo apt update
+sudo apt upgrade
+```
 
 ### Ensure IP Forwarding is enabled.
-`sudo echo "net.ipv4.ip_forward = 1" > /etc/sysctl.d/wg.conf`
-`sudo echo "net.ipv6.conf.all.forwarding = 1" >> /etc/sysctl.d/wg.conf`
+```
+sudo echo "net.ipv4.ip_forward = 1" > /etc/sysctl.d/wg.conf
+sudo echo "net.ipv6.conf.all.forwarding = 1" >> /etc/sysctl.d/wg.conf
+```
 
 ### Install WireGuard
 `sudo apt install wireguard`
