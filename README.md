@@ -118,6 +118,10 @@ Once you've done that, your IaaS Provider is ready to rock and roll.
 
 ### Setup DNS Provider
 
+WireGuard Gateway Manager uses a DNS Provider to deploy domain names for your Gateway servers. This has nothing to do with your DNS Servers or Images, only allowing WireGuard Gateway Manager to setup DNS for your Gateway Servers when you deploy them. 
+
+WireGuard Gateway Manager currently only supports Cloudflare for DNS services. See [this document](docs/dns/cloudflare/README.md) on getting Cloudflare setup for use with WireGuard Gateway Manager.
+
 ### Check Config Templates
 
 ### Deploy Gateway Servers
