@@ -61,7 +61,40 @@ user=<DB USER>
 password=<DB PASSWORD>
 ```
 
+## Using WireGuard Gateway Manager
+
 ### Open WireGuard Gateway Manager for the first time
 Browse over to your webapp making sure to point your browser to the `wgm` directory; example: `https://www.example.com/wgm/`.
 
 ![wgm1](docs/screenshots/wgm1.png)
+
+### Setup IaaS Provider
+Once here, the first thing you need to do is setup your IaaS provider, add an auth config for authenticating with your providers API and download the list of available zones and virtual machine images.
+
+### Setup DNS Provider
+
+### Check Config Templates
+
+### Deploy Gateway Servers
+
+### Deploy DNS Servers
+
+### Create a Network
+
+### Create Network Locations
+
+### Attach Gateway Servers to Network Locations
+
+### Attach DNS Servers to Network
+
+### Create Your First Domain and User
+
+### Create a Client
+
+### Attach Client to Location
+
+### Test Client Connectivity
+
+### Setup PrivacyBot
+
+
