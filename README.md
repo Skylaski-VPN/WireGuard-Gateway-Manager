@@ -64,4 +64,4 @@ password=<DB PASSWORD>
 ### Open WireGuard Gateway Manager for the first time
 Browse over to your webapp making sure to point your browser to the `wgm` directory; example: `https://www.example.com/wgm/`.
 
-
+![wgm1](docs/screenshots/wgm1.png)
