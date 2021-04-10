@@ -24,13 +24,7 @@
   - [Setup PrivacyBot](#setup-privacybot)
 
 ## About
-WireGuard Gateway Manager is a web app for deploying and managing WireGuard Gateway's and Clients.
-
-WireGuard Gateway Manager also comes with a Python CLI for interacting with the manager as well as an API for clients to interact with.
-
-The WebApp frontend is mostly HTML, PHP, and a little JavaScript. It leans heavily on PostgreSQL to maintain state and the Python CLI to do the heavy lifting. 
-
-The client API allows already authenticated client applications the ability to switch DNS preferences, or Locations as well as update their public key on record.
+WireGuard Gateway Manager is a web app for deploying and managing WireGuard Gateway's and Clients
 
 
 ## Dependencies
