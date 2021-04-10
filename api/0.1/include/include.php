@@ -1,5 +1,7 @@
 <?php
 
+require 'mailer.php';
+
 // Generate unique_id's for table entries
 function generateUniqueID($length,$table,$db) {
     $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$%^&*()_-=+';
@@ -67,7 +69,8 @@ function createBasicVPNUser($email,$account,$auth_provider,$db){
 	$user_info['domain_id']=$domain_id;
 	//Domain created, create user
 	$user_uid = generateUniqueID(64,'users',$db);
-	$new_user_sql = "INSERT INTO users (user_name,user_email,domain_id,unique_id,total_clients,auth_provider,provider_id) VALUES ('".pg_escape_string($email)."','".pg_escape_string($email)."',".pg_escape_string($domain_id).",'".pg_escape_string($user_uid)."',0,".$auth_provider.",'".pg_escape_string($account)."')";
+	$new_user_token = createAPIToken('users',$db);
+	$new_user_sql = "INSERT INTO users (user_name,user_email,domain_id,unique_id,total_clients,auth_provider,provider_id,token) VALUES ('".pg_escape_string($email)."','".pg_escape_string($email)."',".pg_escape_string($domain_id).",'".pg_escape_string($user_uid)."',0,".$auth_provider.",'".pg_escape_string($account)."', '".pg_escape_string($new_user_token)."')";
 	$new_user_ret = pg_query($db,$new_user_sql);
 	if(!$new_user_ret){
 		// Failed User Creation
@@ -204,17 +207,54 @@ function validateCoupon($product_id,$coupon_code,$db){
 
 }
 
+function checkReferralCode($code,$pos_db,$wgm_db){
+	// Default reward in Months
+	$reward_months = 1;
+	// get active plan with matching affiliate code
+	$get_affiliate_plan_sql = "SELECT * FROM active_plans WHERE affiliate_code='".pg_escape_string($code)."'";
+	$get_affiliate_plan_ret = pg_query($pos_db,$get_affiliate_plan_sql);
+	$affiliate_plan = pg_fetch_assoc($get_affiliate_plan_ret);
+	if(isset($affiliate_plan['id'])){
+		// We found a matching affiliate, increase their expiration date by number of months 
+		$dt = new DateTime($affiliate_plan['expiration']);
+		$dt->modify("+".$reward_months." months");
+		$dt_formatted = $dt->format("Y-m-d H:i:s P");
+		// Now Update affiliate plan
+		$update_plan_sql = "UPDATE active_plans SET expiration='".pg_escape_string($dt_formatted)."' WHERE id=".pg_escape_string($affiliate_plan['id']);
+		$update_plan_ret = pg_query($pos_db,$update_plan_sql);
+		
+		// Find out the primary owner of the plan and send them an email
+		$get_primary_user_sql = "SELECT user_email FROM users WHERE domain_id=".$affiliate_plan['domain_id']." AND role='primary'";
+		$get_primary_user_ret = pg_query($wgm_db,$get_primary_user_sql);
+		$primary_user = pg_fetch_assoc($get_primary_user_ret);
+		if (filter_var($primary_user['user_email'], FILTER_VALIDATE_EMAIL)) {
+			sendPlanEmail($primary_user['user_email'],"ReferralConfirmed");
+		}
+	}
+
+
+}
+
 function createNewVPNPlan($checkout,$pos_db,$wgm_db){
 	$status = array('status' => False, 'user_token' => '');
+	
+	// Only for NEW VPN Plans do we check for a referral code and take action if it exists.
+	checkReferralCode($checkout['referral_code'],$pos_db,$wgm_db);
 	
 	//get product information
 	$get_product_sql = "SELECT * FROM products WHERE id=".pg_escape_string($checkout['product_id']);
 	$get_product_ret = pg_query($pos_db,$get_product_sql);
+	if(!$get_product_ret){
+		error_log("Failed to get product: ".pg_last_error($pos_db));
+	}
 	$product = pg_fetch_assoc($get_product_ret);
 	
 	//get user information
 	$get_user_sql = "SELECT * FROM users WHERE id=".pg_escape_string($checkout['user_id']);
 	$get_user_ret = pg_query($wgm_db,$get_user_sql);
+	if(!$get_user_ret){
+		error_log("Failed to get user: ".pg_last_error($wgm_db));
+	}
 	$user = pg_fetch_assoc($get_user_ret);
 	
 	// Add Domain to Network
@@ -234,8 +274,7 @@ function createNewVPNPlan($checkout,$pos_db,$wgm_db){
 	}
 	
 	//Update user
-	$new_user_token = createAPIToken('users',$wgm_db);
-	$update_user_sql = "UPDATE users SET role='primary', token='".pg_escape_string($new_user_token)."', total_clients=".pg_escape_string($product['total_clients_per_user'])." WHERE id=".pg_escape_string($checkout['user_id']);
+	$update_user_sql = "UPDATE users SET role='primary', total_clients=".pg_escape_string($product['total_clients_per_user'])." WHERE id=".pg_escape_string($checkout['user_id']);
 	$update_user_ret = pg_query($wgm_db,$update_user_sql);
 	if(!$update_user_ret){
 		error_log("Failed to update user: ".pg_last_error($wgm_db));
@@ -272,7 +311,13 @@ function createNewVPNPlan($checkout,$pos_db,$wgm_db){
 		error_log("Failed to insert active VPN Plan: ".pg_last_error($pos_db));
 		return $status;
 	}
-	$status['user_token']=$new_user_token;
+	
+	// Send email
+	if (filter_var($user['user_email'], FILTER_VALIDATE_EMAIL)) {
+	  sendPlanEmail($user['user_email'],"NewPlan");
+	}
+	
 	$status['status']=True;
 	return $status;
 }
+

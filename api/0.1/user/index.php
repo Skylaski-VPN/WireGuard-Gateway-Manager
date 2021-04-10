@@ -15,15 +15,17 @@ if(isset($headers['Content-Type']) && isset($headers['Authorization'])){
 	}
 	else{
 		$returnArray['message']='Improper Content-Type Header';
+		error_log("Improper Content-Type Header");
 		echo json_encode($returnArray);
-		http_response_code(400);
+		//http_response_code(400);
 		exit();
 	}
 }
 else{
 	$returnArray['message']='Improper Request Headers';
+	error_log('Improper Request Headers');
 	echo json_encode($returnArray);
-	http_response_code(400);
+	//http_response_code(400);
 	exit();
 }
 
@@ -34,16 +36,18 @@ require '../include/commands.php';
 
 $wgm_db = pg_connect( "$db_host $db_port $db_name $db_credentials" );
 if(!$wgm_db){
-	$returnArray['message']='Encountered and Error';
+	$returnArray['message']='Encountered an Error';
+	error_log("Encountered an Error");
 	echo json_encode($returnArray);
-	http_response_code(400);
+	//http_response_code(400);
 	exit();
 }
 $pos_db = pg_connect( "$db_host $db_port $pos_db_name $db_credentials" );
 if(!$pos_db){
-	$returnArray['message']='Encountered and Error';
+	$returnArray['message']='Encountered an Error';
+	error_log("Encountered an Error");
 	echo json_encode($returnArray);
-	http_response_code(400);
+	//http_response_code(400);
 	exit();
 }
 
@@ -51,15 +55,17 @@ $get_user_sql = "SELECT * FROM users WHERE token='".pg_escape_string($token)."'"
 $get_user_ret = pg_query($wgm_db,$get_user_sql);
 if(!$get_user_ret){
 	$returnArray['message']='Encountered an Error';
+	error_log("Encountered an Error");
 	echo json_encode($returnArray);
-	http_response_code(400);
+	//http_response_code(400);
 	exit();
 }
 $user = pg_fetch_assoc($get_user_ret);
 if(!isset($user['id'])){
 	$returnArray['message']='Unauthorized';
+	error_log("Unauthorized");
 	echo json_encode($returnArray);
-	http_response_code(404);
+	//http_response_code(404);
 	exit();
 }
 //echo "<p>User ID: ".$user['id']."</p>";
@@ -70,15 +76,17 @@ $get_user_domain_sql = "SELECT * FROM domains WHERE id=".pg_escape_string($user[
 $get_user_domain_ret = pg_query($wgm_db,$get_user_domain_sql);
 if(!$get_user_domain_ret){
 	$returnArray['message']='Encountered an Error';
+	error_log("Encountered an Error");
 	echo json_encode($returnArray);
-	http_response_code(400);
+	//http_response_code(400);
 	exit();
 }
 $domain = pg_fetch_assoc($get_user_domain_ret);
 if(!isset($domain['id'])){
 	$returnArray['message']='User has no associated Domain';
+	error_log("User has no associated Domain");
 	echo json_encode($returnArray);
-	http_response_code(400);
+	//http_response_code(400);
 	exit();
 }
 
@@ -91,14 +99,119 @@ $data = json_decode($json);
 // This MUST be called with a 'cmd'
 if(!isset($data->cmd)){
 	$returnArray['message']='No Command Provided';
+	error_log("No Command Provided");
 	echo json_encode($returnArray);
-	http_response_code(400);
+	//http_response_code(400);
 	exit();
 }
 
 
 // HERE THE API COMMANDS BEGIN
 switch ($data->cmd){
+	case "google_checkout":
+		error_log("GOOGLE_CHECKOUT");
+		if(!isset($data->purchaseCode) || !isset($data->sku)){
+			error_log("Not Enough Parameters");
+			$returnArray['message']='Not Enough Parameters';
+			echo json_encode($returnArray);
+			pg_close($wgm_db);
+			pg_close($pos_db);
+			exit();
+		}
+		
+		// First we check to make sure there is an official purchaseCode already provided by Google via our subscription
+		$get_google_payment_sql = "SELECT * FROM payments_googleplay WHERE purchase_code='".pg_escape_string($data->purchaseCode)."'";
+		$get_google_payment_ret = pg_query($pos_db,$get_google_payment_sql);
+		if(!isset($get_google_payment_ret)){
+			$returnArray['message'] = 'DB Error';
+			echo json_encode($returnArray);
+			pg_close($wgm_db);
+			pg_close($pos_db);
+			exit();
+		}
+		$google_payment = pg_fetch_assoc($get_google_payment_ret);
+		// Is there a match?
+		if($google_payment['purchase_code'] != $data->purchaseCode){
+			$returnArray['message'] = 'Invalid Purchase Code';
+			echo json_encode($returnArray);
+			pg_close($wgm_db);
+			pg_close($pos_db);
+			exit();
+		}
+		// Match found. Let's see if there is a checkout already
+		// Google checkouts start in complete
+		$get_cur_checkout_sql = "SELECT * FROM checkouts WHERE transaction_id='".pg_escape_string($data->purchaseCode)."'";
+		$get_cur_checkout_ret = pg_query($pos_db,$get_cur_checkout_sql);
+		$cur_checkout = pg_fetch_assoc($get_cur_checkout_ret);
+		if($cur_checkout){
+			if($cur_checkout['transaction_id'] == $data->purchaseCode){
+				// checkout already exists
+				// Find an active VPN plan
+				$find_vpn_plan_sql = "SELECT * FROM active_plans WHERE checkout_id=".pg_escape_string($cur_checkout['id']);
+				$find_vpn_plan_ret = pg_query($pos_db,$find_vpn_plan_sql);
+				$vpn_plan = pg_fetch_assoc($find_vpn_plan_ret);
+				if($vpn_plan['checkout_id'] == $cur_checkout['id']){
+					$returnArray['Message'] = 'VPN Plan Already Exists';
+					echo json_encode($returnArray);
+					pg_close($wgm_db);
+					pg_close($pos_db);
+					exit();
+				}
+				
+				// Checkout already exists, but a VPN plan doesn't exist
+				$result = createNewVPNPlan($cur_checkout,$pos_db,$wgm_db);
+				if($result['status']){
+					//$_SESSION['user_token']=$result['user_token'];
+					//error_log("New VPN Plan Created: coinbase");
+				}
+				else{
+					error_log("FAILED to create VPN Plan: coinbase");
+				}
+			}
+		}
+		
+		// Transaction confirmed by google and no current plan exists.
+		// Get Product
+		$get_product_sql = "SELECT * FROM products WHERE id=".pg_escape_string($data->sku);
+		$get_product_ret = pg_query($pos_db,$get_product_sql);
+		$product = pg_fetch_assoc($get_product_ret);
+		
+		// Create a checkout
+		$new_checkout_uid = createCheckoutCode($pos_db);
+		$create_checkout_sql = "INSERT INTO checkouts (payment_method,domain_id,user_id,product_id,total,subtotal,unique_id,status,referral_code,transaction_id) VALUES ( 4, ".pg_escape_string($domain['id']).", ".pg_escape_string($user['id']).", ".pg_escape_string($product['id']).", ".pg_escape_string($product['price']).", ".pg_escape_string($product['price']).", '".pg_escape_string($new_checkout_uid)."', '".pg_escape_string("google:".$google_payment['last_event'])."', '".pg_escape_string($domain['referral_code'])."', '".pg_escape_string($data->purchaseCode)."' )";
+		$create_checkout_ret = pg_query($pos_db,$create_checkout_sql);
+		if(!$create_checkout_ret){
+			error_log("Failed to create new checkout: ".pg_last_error($pos_db));
+		}
+		// Get the new checkout
+		$get_checkout_sql = "SELECT * FROM checkouts WHERE transaction_id='".pg_escape_string($data->purchaseCode)."'";
+		$get_checkout_ret = pg_query($pos_db,$get_checkout_sql);
+		$new_checkout = pg_fetch_assoc($get_checkout_ret);
+		
+		// Create the VPN Plan
+		$result = createNewVPNPlan($new_checkout,$pos_db,$wgm_db);
+		if($result['status']){
+			//$_SESSION['user_token']=$result['user_token'];
+			error_log("New VPN Plan Created: googleplay");
+		}
+		else{
+			error_log("FAILED to create VPN Plan: googleplay");
+			$returnArray['message']="FAILED to create VPN Plan: googleplay";
+			echo json_encode($returnArray);
+			pg_close($wgm_db);
+			pg_close($pos_db);
+			exit();
+		}
+			
+		$returnArray['status'] = 'Success';
+		$returnArray['message'] = 'Success';
+		$returnArray['success'] = True;
+		echo json_encode($returnArray);
+		pg_close($wgm_db);
+		pg_close($pos_db);
+		exit();
+		break;
+		
 	case "get_user":
 		// Get user unique_id & total clients
 		$result = array ('user_id' => $user['unique_id'], 'total_clients' => $user['total_clients'], 'role' => $user['role']);
@@ -235,7 +348,7 @@ switch ($data->cmd){
 			exit();
 		}
 		
-		deleteClient($data->local_uid,$wgm_db);
+		deleteClient($data->local_uid,$wgm_db,$PATH_TO_CLI);
 				
 		$returnArray['message']="Client deleted";
 		$returnArray['status']="Success";
@@ -275,7 +388,7 @@ WHERE domnet.domain_id=".pg_escape_string($user['domain_id']);
 		exit();
 		break;
 		
-	case 'delete_user':
+	case "delete_user":
 		/* Deleting a user we need to do the following.... 
 			1) Check Role,
 			2) For Primary Users, we'll clear the entire domain of users and clients before deleting the VPN plan.
@@ -297,7 +410,7 @@ WHERE domnet.domain_id=".pg_escape_string($user['domain_id']);
 				exit();
 			}
 			while($client = pg_fetch_assoc($get_all_clients_ret)){
-				deleteClient($client['local_uid'],$wgm_db);
+				deleteClient($client['local_uid'],$wgm_db,$PATH_TO_CLI);
 			}
 			
 			// Delete all the users of the domain

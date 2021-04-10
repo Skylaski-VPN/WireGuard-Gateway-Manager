@@ -150,7 +150,8 @@ switch ($data->cmd){
 		// Check for mandatory input
 		if(!isset($data->local_uid) || !isset($data->name) || !isset($data->pub_key) || !isset($data->dns_type)){
 			$returnArray['message']="Missing Parameters";
-			http_response_code(400);
+			error_log("create_client: Missing Parameters");
+			//http_response_code(400);
 			echo json_encode($returnArray);
 			pg_close($wgm_db);
 			exit();
@@ -164,6 +165,7 @@ switch ($data->cmd){
 			$results = array( 'max_clients' => True);
 			$returnArray['result']=$results;
 			$returnArray['message']="Maximum Clients Already Created";
+			error_log("create_client: Maximum Clients Already Created");
 			echo json_encode($returnArray);
 			pg_close($wgm_db);
 			exit();

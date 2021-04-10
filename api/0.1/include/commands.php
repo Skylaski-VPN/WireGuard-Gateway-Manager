@@ -4,7 +4,7 @@
 #
 #
 
-function deleteClient($local_uid, $wgm_db){
+function deleteClient($local_uid, $wgm_db, $PATH_TO_CLI){
 	
 	if(!isset($local_uid)){
 		error_log("user api: delete_client: Must provide local_uid");
