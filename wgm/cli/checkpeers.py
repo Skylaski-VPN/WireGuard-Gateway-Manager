@@ -14,9 +14,8 @@ import psycopg2.extras
 import os
 import subprocess
 
-# CHANGE THESE FOR YOUR SETUP AND UNCOMMENT
-#NETWORKS = [ 1 ]
-#wg_output_path = '/full/path/to/wgm/cli/privacybot/wg_output.out'
+NETWORKS = [ 1 ]
+wg_output_path = '/home/wgm/www/wgm0.skylaski.com/wgm/cli/privacybot/wg_output.out'
 
 # Get Network Servers
 
