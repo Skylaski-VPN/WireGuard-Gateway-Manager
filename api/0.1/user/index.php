@@ -108,6 +108,21 @@ if(!isset($data->cmd)){
 
 // HERE THE API COMMANDS BEGIN
 switch ($data->cmd){
+	case "get_checkout":
+		$get_checkout_sql = "SELECT * FROM checkouts che JOIN payment_methods pay ON che.payment_method=pay.id WHERE user_id=".pg_escape_string($user['id'])." ORDER BY updated_at DESC";
+		$get_checkout_ret = pg_query($pos_db,$get_checkout_sql);
+		$checkout = pg_fetch_assoc($get_checkout_ret);
+		
+		$returnArray['result'] = $checkout;
+		$returnArray['status'] = 'Success';
+		$returnArray['message'] = 'Success';
+		$returnArray['success'] = True;
+		echo json_encode($returnArray);
+		pg_close($wgm_db);
+		pg_close($pos_db);
+		exit();
+		break;
+		
 	case "google_checkout":
 		error_log("GOOGLE_CHECKOUT");
 		if(!isset($data->purchaseCode) || !isset($data->sku)){
@@ -304,7 +319,18 @@ switch ($data->cmd){
 			exit();
 		}
 		$upgradeCount = pg_fetch_assoc($get_products_ret);
-		$returnArray['result'] = array('upgrades_available' => $upgradeCount['count']);
+		$returnArray['result'] = array('upgrades_available' => $upgradeCount['count'], 'plans' => array());
+		
+		// if $upgrade_count > 0, find out what those plans were.
+		if($upgradeCount['count'] > 0){
+			$get_plans_sql = "SELECT * FROM products WHERE total_users > ".pg_escape_string($plan['total_users'])." OR total_clients_per_user > ".pg_escape_string($plan['total_clients_per_user']);
+			$get_plans_ret = pg_query($pos_db,$get_plans_sql);
+			while($plan = pg_fetch_assoc($get_plans_ret)){
+				array_push($returnArray['result']['plans'],$plan);
+			}
+		}
+		
+		
 		$returnArray['status']='Success';
 		$returnArray['message']='Success';
 		$returnArray['success']=True;

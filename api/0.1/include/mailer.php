@@ -18,7 +18,7 @@ $messageNewPlan = <<<EOT
 		
 <br><br><p>Next, check out our <a href="https://discourse.skylaski.com">Community</a> for even more information and support!</p><br><br>
 
-<p>Follow us on Social Media to learn more about Privacy and Security.</p>
+<p>Follow us on Social Media to learn more about Privacy and Security online.</p>
 
 <a href="https://www.facebook.com/skylaskivpn" target="_blank"><img src="https://www0.skylaski.com/media/pics/social/icon-facebook-square-png-24x24.png"></a>
 <a href="https://www.instagram.com/skylaskivpn" target="_blank"><img src="https://www0.skylaski.com/media/pics/social/ig-1-24x24.jpg"></a>
