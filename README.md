@@ -2,6 +2,7 @@
 - [About](#About)
 - [Dependencies](#Dependencies)
 - [Install](#Install)
+  - [Prepare Apache](#Prepare-Apache)
   - [Get WireGuard Gateway Manager](#Get-WireGuard-Gateway-Manager)
   - [Setup Database](#Setup-Database)
   - [Configure WireGuard Gateway Manager](#configure-wireguard-gateway-manager)
