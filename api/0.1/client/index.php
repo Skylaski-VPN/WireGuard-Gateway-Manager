@@ -5,6 +5,11 @@ $returnArray = array('status' => 'Failed', 'message' => 'Failed', 'success' => F
 // First we check for proper headers, should receive content-type: application/json & an Authorization token.
 $headers = apache_request_headers();
 
+// DEBUG LOG INCOMING HEADERS
+foreach($headers as $key => $value){
+	error_log("HEADERS: - $key : $value");
+}
+
 // Cloudflare sometimes messes with the cases on these headers
 if($headers['Content-Type'] == 'application/json' || $headers['content-type'] == 'application/json'){
 	if(isset($headers['Authorization']) || isset($headers['authorization'])){
@@ -491,7 +496,7 @@ WHERE domnet.domain_id=".pg_escape_string($user['domain_id']);
 				// success, we found a matching DNS server for this client
 				
 				// First let's update the client record with the new preferred DNS Type
-				$update_client_dns_sql = "UPDATE clients SET dns_type=".pg_escape_string($data->dns_type)." WHERE WHERE unique_id='".pg_escape_string($data->client_uid)."' AND token='".pg_escape_string($data->client_token)."'";
+				$update_client_dns_sql = "UPDATE clients SET dns_type=".pg_escape_string($data->dns_type)." WHERE unique_id='".pg_escape_string($data->client_uid)."' AND token='".pg_escape_string($data->client_token)."'";
 				$update_client_dns_ret = pg_query($wgm_db,$update_client_dns_sql);
 				if(!$update_client_dns_ret){
 					error_log("get_dns: Failed to update client with new DNS type");
