@@ -4,48 +4,43 @@ $returnArray = array('status' => 'Failed', 'message' => 'Failed', 'success' => F
 
 // First we check for proper headers, should receive content-type: application/json & an Authorization token.
 $headers = apache_request_headers();
+if(isset($headers['Content-Type'])){
+	$myContentType = $headers['Content-Type'];
+}
+elseif(isset($headers['content-type'])){
+	$myContentType = $headers['content-type'];
+}
+if(isset($headers['Authorization'])){
+	$myAuthorization = $headers['Authorization'];
+}
+elseif(isset($headers['authorization'])){
+	$myAuthorization = $headers['authorization'];
+	
+}
 
 // Cloudflare sometimes messes with the cases on these headers
-if($headers['Content-Type'] == 'application/json' || $headers['content-type'] == 'application/json'){
-	if(isset($headers['Authorization']) || isset($headers['authorization'])){
-		$auth = $headers['Authorization'];
-		//var_dump($auth);
-		if(isset($headers['Authorization'])){
-			preg_match('/^Bearer (.*)$/',$headers['Authorization'],$matches);
+if(isset($myContentType) && isset($myAuthorization)){
+			preg_match('/^Bearer (.*)$/',$myAuthorization,$matches);
 			$token = $matches[1];
-		}
-		else{
-			preg_match('/^Bearer (.*)$/',$headers['authorization'],$matches);
-			$token = $matches[1];
-		}
-		//echo "<p>Token: ".$token."</p>";
-	}
-	else{
-		$returnArray['message']='Improper Authorization Header';
-		error_log("Improper Authorization Header");
-		echo json_encode($returnArray);
-		exit();
-	}
 }
 else{
-	$returnArray['message']='Improper Content-Type Header';
+	$returnArray['message']='Improper Headers';
 	error_log("Improper Content-Type Header");
 	echo json_encode($returnArray);
-	//http_response_code(400);
 	exit();
 }
 
-// Now we have a token to check. 
+// Now we have work to do
 require '../include/config.php';
 require '../include/include.php';
 require '../include/commands.php';
 
+// open db
 $wgm_db = pg_connect( "$db_host $db_port $db_name $db_credentials" );
 if(!$wgm_db){
 	$returnArray['message']='Encountered an Error';
 	error_log("Encountered an Error");
 	echo json_encode($returnArray);
-	//http_response_code(400);
 	exit();
 }
 $pos_db = pg_connect( "$db_host $db_port $pos_db_name $db_credentials" );
@@ -53,10 +48,10 @@ if(!$pos_db){
 	$returnArray['message']='Encountered an Error';
 	error_log("Encountered an Error");
 	echo json_encode($returnArray);
-	//http_response_code(400);
 	exit();
 }
 
+// Get User information
 $get_user_sql = "SELECT * FROM users WHERE token='".pg_escape_string($token)."'";
 $get_user_ret = pg_query($wgm_db,$get_user_sql);
 if(!$get_user_ret){
@@ -67,15 +62,13 @@ if(!$get_user_ret){
 	exit();
 }
 $user = pg_fetch_assoc($get_user_ret);
+// Kick out users that don't exist
 if(!isset($user['id'])){
 	$returnArray['message']='Unauthorized';
 	error_log("Unauthorized");
 	echo json_encode($returnArray);
-	//http_response_code(404);
 	exit();
 }
-//echo "<p>User ID: ".$user['id']."</p>";
-// User Authorization PASS
 
 // Get Domain Information
 $get_user_domain_sql = "SELECT * FROM domains WHERE id=".pg_escape_string($user['domain_id']);
@@ -87,6 +80,7 @@ if(!$get_user_domain_ret){
 	//http_response_code(400);
 	exit();
 }
+// Validate domain
 $domain = pg_fetch_assoc($get_user_domain_ret);
 if(!isset($domain['id'])){
 	$returnArray['message']='User has no associated Domain';
