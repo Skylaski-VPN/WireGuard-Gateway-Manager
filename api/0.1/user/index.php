@@ -5,25 +5,31 @@ $returnArray = array('status' => 'Failed', 'message' => 'Failed', 'success' => F
 // First we check for proper headers, should receive content-type: application/json & an Authorization token.
 $headers = apache_request_headers();
 
-if(isset($headers['Content-Type']) && isset($headers['Authorization'])){
-	if($headers['Content-Type'] == 'application/json'){
+// Cloudflare sometimes messes with the cases on these headers
+if($headers['Content-Type'] == 'application/json' || $headers['content-type'] == 'application/json'){
+	if(isset($headers['Authorization']) || isset($headers['authorization'])){
 		$auth = $headers['Authorization'];
 		//var_dump($auth);
-		preg_match('/^Bearer (.*)$/',$headers['Authorization'],$matches);
-		$token = $matches[1];
+		if(isset($headers['Authorization'])){
+			preg_match('/^Bearer (.*)$/',$headers['Authorization'],$matches);
+			$token = $matches[1];
+		}
+		else{
+			preg_match('/^Bearer (.*)$/',$headers['authorization'],$matches);
+			$token = $matches[1];
+		}
 		//echo "<p>Token: ".$token."</p>";
 	}
 	else{
-		$returnArray['message']='Improper Content-Type Header';
-		error_log("Improper Content-Type Header");
+		$returnArray['message']='Improper Authorization Header';
+		error_log("Improper Authorization Header");
 		echo json_encode($returnArray);
-		//http_response_code(400);
 		exit();
 	}
 }
 else{
-	$returnArray['message']='Improper Request Headers';
-	error_log('Improper Request Headers');
+	$returnArray['message']='Improper Content-Type Header';
+	error_log("Improper Content-Type Header");
 	echo json_encode($returnArray);
 	//http_response_code(400);
 	exit();
@@ -246,7 +252,7 @@ switch ($data->cmd){
 		if(!$get_plan_info_ret){
 			$returnArray['message']='Encountered an Error';
 			echo json_encode($returnArray);
-			http_response_code(400);
+			//http_response_code(400);
 			pg_close($wgm_db);
 			pg_close($pos_db);
 			exit();
@@ -258,7 +264,7 @@ switch ($data->cmd){
 		if(!$get_product_ret){
 			$returnArray['message']='Encountered an Error';
 			echo json_encode($returnArray);
-			http_response_code(400);
+			//http_response_code(400);
 			pg_close($wgm_db);
 			pg_close($pos_db);
 			exit();
