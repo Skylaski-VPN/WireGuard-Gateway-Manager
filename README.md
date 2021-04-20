@@ -38,6 +38,35 @@ WireGuard Gateway Manager is a web app for deploying and managing WireGuard Gate
 
 *In order for WireGuard Gateway Manager to interact with the gateway servers, the webserver must run as a user with a `/home/` directory and a pair of SSH keys setup in `~/.ssh/`.*
 
+### Prepare Apache
+First create the user you'll run WGM with. We use `wgm` here.
+
+```
+# sudo useradd -m -G users,www-data wgm
+# su wgm
+# cd ~/
+```
+Next, create your SSH Keys. We'll use the public key to authenticate with servers setup through the IaaS Provider. 
+```
+# ssh-keygen
+```
+Update Apache, edit `/etc/apache2/envvars`.
+Change this:
+```
+export APACHE_RUN_USER=www-data
+export APACHE_RUN_GROUP=www-data
+```
+To
+```
+export APACHE_RUN_USER=wgm
+export APACHE_RUN_GROUP=wgm
+
+```
+Then restart Apache
+```
+# sudo systemctl restart apache2
+```
+
 ### Get WireGuard Gateway Manager
 First extract the tarball to a working webdirectory. 
 
