@@ -2,6 +2,7 @@
 - [About](#About)
 - [Dependencies](#Dependencies)
 - [Install](#Install)
+  - [Prepare Apache](#Prepare-Apache)
   - [Get WireGuard Gateway Manager](#Get-WireGuard-Gateway-Manager)
   - [Setup Database](#Setup-Database)
   - [Configure WireGuard Gateway Manager](#configure-wireguard-gateway-manager)
@@ -38,6 +39,35 @@ WireGuard Gateway Manager is a web app for deploying and managing WireGuard Gate
 
 *In order for WireGuard Gateway Manager to interact with the gateway servers, the webserver must run as a user with a `/home/` directory and a pair of SSH keys setup in `~/.ssh/`.*
 
+### Prepare Apache
+First create the user you'll run WGM with. We use `wgm` here.
+
+```
+# sudo useradd -m -G users,www-data wgm
+# su wgm
+# cd ~/
+```
+Next, create your SSH Keys. We'll use the public key to authenticate with servers setup through the IaaS Provider. 
+```
+# ssh-keygen
+```
+Update Apache, edit `/etc/apache2/envvars`.
+Change this:
+```
+export APACHE_RUN_USER=www-data
+export APACHE_RUN_GROUP=www-data
+```
+To
+```
+export APACHE_RUN_USER=wgm
+export APACHE_RUN_GROUP=wgm
+
+```
+Then restart Apache
+```
+# sudo systemctl restart apache2
+```
+
 ### Get WireGuard Gateway Manager
 First extract the tarball to a working webdirectory. 
 
@@ -55,7 +85,7 @@ Once you have a user and database ready to go, use the provided `pg_dump` file t
 `psql --dbname=[DATABASE_NAME] < wgm_db.sql`
 
 ### Configure WireGuard Gateway Manager
-Once the database is ready to go open `wgm/wgm_config.sample.php` and edit your database settings.
+Once the database is setup open `wgm/wgm_config.sample.php` and edit your database settings.
 
 ```
 <?php
@@ -80,7 +110,7 @@ To configure the API open api/<version>/config.sample.php and edit the necessary
         $db_name      = "dbname = <DB>";
         $db_credentials = "user = <DB USER> password=<DB PASSWORD>";
 
-        $PATH_TO_CLI = "<FULL PATH TO wgm/cli/>";
+        $PATH_TO_CLI = "<FULL/PATH/TO/wgm/cli/>";
 ?>
 ```
 
@@ -104,16 +134,16 @@ Browse over to your webapp making sure to point your browser to the `wgm` direct
 ![wgm1](docs/screenshots/wgm1.png)
 
 ### Setup IaaS Provider
-Once here, the first thing you need to do is setup your IaaS provider, add an auth config for authenticating with your providers API and download the list of available zones and virtual machine images.
+Once here, the first thing you need to do is setup your IaaS provider, add an auth config for authenticating with your providers API and download the list of available zones and virtual machine images. The IaaS provider is what you'll use for deploying VM's with predefined images that are ready to host DNS Servers for clients to resolve DNS, and WireGuard Gateway Servers for hosting WireGuard endpoints that will act as gateways to the Internet.
 
 Currently WireGuard Gateway Manager only supports DigitalOcean. Please see [this document](docs/iaas/digitalocean/README.md) on getting DigitalOcean setup for WireGuard Gateway Manager.
 
-Once DigitalOcean is ready to go create the IaaS provider in WireGuard Gateway Manager by clicking the 'IaaS Providers' link.
+Once DigitalOcean is ready to go, create the IaaS provider in WireGuard Gateway Manager by clicking the 'IaaS Providers' link.
 ![iaas](docs/screenshots/iaas1.png)
 
 Here you'll set a Name and Description as well as Type. Make sure you select DigitalOcean as the provider type. 'Other' is not supported.
 
-Once created we can move on to setting up the authentication configuration.
+Once created, we can move on to setting up the authentication configuration.
 
 Click 'HOME' or navigate back to `/wgm/` in your web browser and you'll see the 'Add Auth Config' link is now active. 
 
@@ -123,13 +153,13 @@ Click 'Add Auth Config' to setup authentication for this provider's API.
 
 Here you *MUST* fill out a Name and Description as well as 'Auth Key0' which is your DigitalOcean API token created earlier. 
 
-'SSH Key0' *MUST* also be provided. Make sure this is a Public SSH Key that has been setup in your DigitalOcean environment as well. 
+'SSH Key0' *MUST* also be provided. This must be the public SSH Key of the user the Apache server is running as. For DigitalOcean, this SSH Key must be added to the account before it can be used.
 
-When you go to add an Auth Config, WireGuard Gateway Manager will test your tokens and keys to make sure their valid. 
+When you add an Auth Config, WireGuard Gateway Manager will test your tokens and keys to make sure their valid. If this fails, double check your Auth and SSH Keys.
 
 ![authtest](docs/screenshots/iaas3.png)
 
-Once a proper Auth Config has been setup, we need to download the available Zones and Images for this IaaS Provider. 
+Once a proper Auth Config has been setup, we need to setup the available Zones and Images for this IaaS Provider. 
 
 Navigate back to 'HOME' and you'll see the 'Setup Provider' link is enabled.
 
@@ -138,6 +168,8 @@ Navigate back to 'HOME' and you'll see the 'Setup Provider' link is enabled.
 Click 'Update Zones' to download a list of available zones for this provider.
 
 Click 'Update Images' to download a list of available images for this provider. 
+
+Make sure you have at least 1 zone and 2 images.
 
 Click 'HOME' to go back to the main page. 
 
@@ -169,7 +201,7 @@ WireGuard provides Config templates out of the box for Clients and Gateways. You
 
 Deploying a gateway server with WireGuard Gateway Manager is pretty easy. Once your IaaS Provider is setup you should be able to access this link and set the appropriate options. 
 
-Adding a GW server will deploy a VM on the IaaS provider's environment using a provided image within the specified zone. 
+Adding a GW server will deploy a VM on the IaaS provider's environment using a provided image within the specified zone. This takes ~80 seconds to complete.
 
 ### Deploy DNS Servers
 
@@ -181,7 +213,7 @@ A Network in WireGuard Gateway Manager is a logical network identified by it's p
 To create a functioning Network you must have at least 1 Gateway server and DNS server deployed. 
 
 ### Create Network Locations
-Each Network can have it's own set of Locations. These Locations only exist logically in WireGuard Gateway Manager, but are used to load balance clients across all Gateway servers associated with them.
+Each Network can have it's own set of Locations. These Locations only exist logically in WireGuard Gateway Manager, but are used to load balance clients across all Gateway servers associated with them. They're typically synonymous with the IaaS provider's zones.
 
 ### Attach Gateway Servers to Network Locations
 
