@@ -242,6 +242,7 @@ switch ($data->cmd){
 	
 	case "get_plan":
 		$get_plan_info_sql = "SELECT * FROM active_plans WHERE domain_id=".pg_escape_string($domain['id']);
+		error_log("getting plan: $get_plan_info_sql");
 		$get_plan_info_ret = pg_query($pos_db,$get_plan_info_sql);
 		if(!$get_plan_info_ret){
 			$returnArray['message']='Encountered an Error';
@@ -254,6 +255,7 @@ switch ($data->cmd){
 		$plan = pg_fetch_assoc($get_plan_info_ret);
 		// We have the plan, let's get some information about the product.
 		$get_product_sql = "SELECT * FROM products WHERE id=".pg_escape_string($plan['product_id']);
+		error_log("Getting Product: $get_product_sql");
 		$get_product_ret = pg_query($pos_db,$get_product_sql);
 		if(!$get_product_ret){
 			$returnArray['message']='Encountered an Error';
@@ -306,30 +308,28 @@ switch ($data->cmd){
 		$get_plan_sql = "SELECT * FROM active_plans WHERE domain_id=".pg_escape_string($domain['id']);
 		$get_plan_ret = pg_query($pos_db,$get_plan_sql);
 		$plan = pg_fetch_assoc($get_plan_ret);
-	
-		// New product selection
-		$get_products_sql = "SELECT count(id) as count FROM products WHERE total_users > ".pg_escape_string($plan['total_users'])." OR total_clients_per_user > ".pg_escape_string($plan['total_clients_per_user']);
-		$get_products_ret = pg_query($pos_db,$get_products_sql);
-		if(!$get_products_ret){
-			$returnArray['message']='Encountered an Error';
-			echo json_encode($returnArray);
-			http_response_code(400);
-			pg_close($wgm_db);
-			pg_close($pos_db);
-			exit();
+		$upgrade_plans = array();
+		
+		// Get plans with more users
+		$get_more_users_sql = "SELECT * FROM products WHERE total_users > ".pg_escape_string($plan['total_users']);
+		$get_more_users_ret = pg_query($pos_db,$get_more_users_sql);
+		while($more_users_plan = pg_fetch_assoc($get_more_users_ret)){
+			array_push($upgrade_plans,$more_users_plan);
 		}
-		$upgradeCount = pg_fetch_assoc($get_products_ret);
-		$returnArray['result'] = array('upgrades_available' => $upgradeCount['count'], 'plans' => array());
+		// Get Plans with same users, more clients
+		$get_more_clients_sql = "SELECT * FROM products WHERE total_users=".pg_escape_string($plan['total_users']);
+		$get_more_clients_ret = pg_query($pos_db,$get_more_clients_sql);
+		while($more_clients_plan = pg_fetch_assoc()){
+			array_push($upgrade_plans,$more_clients_plan);
+		}
+	
+		
+		$returnArray['result'] = array('upgrades_available' => count($upgrade_plans), 'plans' => array());
 		
 		// if $upgrade_count > 0, find out what those plans were.
-		if($upgradeCount['count'] > 0){
-			$get_plans_sql = "SELECT * FROM products WHERE total_users > ".pg_escape_string($plan['total_users'])." OR total_clients_per_user > ".pg_escape_string($plan['total_clients_per_user']);
-			$get_plans_ret = pg_query($pos_db,$get_plans_sql);
-			while($plan = pg_fetch_assoc($get_plans_ret)){
-				array_push($returnArray['result']['plans'],$plan);
-			}
+		if(count($upgrade_plans) > 0){
+			array_push($returnArray['result']['plans'],$upgrade_plans);
 		}
-		
 		
 		$returnArray['status']='Success';
 		$returnArray['message']='Success';

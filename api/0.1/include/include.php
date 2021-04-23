@@ -179,6 +179,36 @@ function createAffiliateCode($db){
     return $randomString;
 }
 
+function createTeamCode($db){
+	// Affiliate codes max len 32
+	$length = 32;
+	$table='active_plans';
+	
+	$characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    $charactersLength = strlen($characters);
+    $randomString = '';
+    for ($i = 0; $i < $length; $i++) {
+        $randomString .= $characters[rand(0, $charactersLength - 1)];
+    }
+    
+    //get list of uniqueIDs from $table
+    $get_ids_sql = "SELECT team_code FROM ".$table;
+    $get_ids_ret = pg_query($db,$get_ids_sql);
+    $ids_array = array();
+    while($id = pg_fetch_assoc($get_ids_ret)){
+		array_push($ids_array,$id['team_code']);
+	}
+	// While random string isn't unique, generate a new one
+    while(in_array($randomString,$ids_array)){
+		for ($i = 0; $i < $length; $i++) {
+			$randomString .= $characters[rand(0, $charactersLength - 1)];
+		}
+	}
+    
+    
+    return $randomString;
+}
+
 function validateCoupon($product_id,$coupon_code,$db){
 	$couponArray = array( 'modifier' => 0, 'id' => null );
 	
@@ -248,6 +278,7 @@ function createNewVPNPlan($checkout,$pos_db,$wgm_db){
 		error_log("Failed to get product: ".pg_last_error($pos_db));
 	}
 	$product = pg_fetch_assoc($get_product_ret);
+	$product_total_users = $product['total_users'];
 	
 	//get user information
 	$get_user_sql = "SELECT * FROM users WHERE id=".pg_escape_string($checkout['user_id']);
@@ -266,7 +297,7 @@ function createNewVPNPlan($checkout,$pos_db,$wgm_db){
 	}
 	
 	//Update Domain with user count
-	$update_domain_sql = "UPDATE domains SET total_users=".pg_escape_string($product['total_users'])." WHERE id=".pg_escape_string($user['id']);
+	$update_domain_sql = "UPDATE domains SET total_users=".pg_escape_string($product['total_users'])." WHERE id=".pg_escape_string($user['domain_id']);
 	$update_domain_ret = pg_query($wgm_db,$update_domain_sql);
 	if(!$update_domain_ret){
 		error_log("Failed to update domain's total users: ".pg_last_error($wgm_db));
@@ -304,8 +335,16 @@ function createNewVPNPlan($checkout,$pos_db,$wgm_db){
 	$dt = $dt->modify("+".$product['periods']." ".$product['period_unit']."s");
 	$dt_formatted = $dt->format("Y-m-d H:i:s P");
 	$new_affiliate_code = createAffiliateCode($pos_db);
-	$insert_active_plan_sql = "INSERT INTO active_plans (domain_id,checkout_id,product_id,coupon_id,total,subtotal,discounts,fees,total_users,total_clients_per_user,expiration,referral_code,affiliate_code) VALUES (".pg_escape_string($user['domain_id']).", ".pg_escape_string($checkout['id']).", ".pg_escape_string($product['id']).", ".pg_escape_string($coupon_id).", ".pg_escape_string($checkout['total']).", ".pg_escape_string($checkout['subtotal']).", ".pg_escape_string($discounts).", ".pg_escape_string($fees).", ".pg_escape_string($product['total_users']).", ".pg_escape_string($product['total_clients_per_user']).", '".pg_escape_string($dt_formatted)."', '".pg_escape_string($checkout['referral_code'])."', '".pg_escape_string($new_affiliate_code)."')";
-	//error_log("''' ".$insert_active_plan_sql." '''");
+	
+	# If this is a team plan, we create the team code
+	if($product_total_users > 1){
+		$new_team_code = createTeamCode($pos_db);
+	}
+	else{
+		$new_team_code = NULL;
+	}
+	
+	$insert_active_plan_sql = "INSERT INTO active_plans (team_code,domain_id,checkout_id,product_id,coupon_id,total,subtotal,discounts,fees,total_users,total_clients_per_user,expiration,referral_code,affiliate_code) VALUES ('".pg_escape_string($new_team_code)."', ".pg_escape_string($user['domain_id']).", ".pg_escape_string($checkout['id']).", ".pg_escape_string($product['id']).", ".pg_escape_string($coupon_id).", ".pg_escape_string($checkout['total']).", ".pg_escape_string($checkout['subtotal']).", ".pg_escape_string($discounts).", ".pg_escape_string($fees).", ".pg_escape_string($product['total_users']).", ".pg_escape_string($product['total_clients_per_user']).", '".pg_escape_string($dt_formatted)."', '".pg_escape_string($checkout['referral_code'])."', '".pg_escape_string($new_affiliate_code)."')";
 	$insert_active_plan_ret = pg_query($pos_db,$insert_active_plan_sql);
 	if(!$insert_active_plan_ret){
 		error_log("Failed to insert active VPN Plan: ".pg_last_error($pos_db));

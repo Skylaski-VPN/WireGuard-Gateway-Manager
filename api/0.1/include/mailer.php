@@ -1,6 +1,7 @@
 <?php
 
 // Mailer.php
+require('config.php');
 
 $mailHeaders = 'From: skylaski@skylaski.com' . "\r\n" .
     'Reply-To: skylaski@skylaski.com' . "\r\n" .
@@ -10,24 +11,25 @@ $mailHeaders = 'From: skylaski@skylaski.com' . "\r\n" .
 $subjectNewPlan = "Your Skylaski.com VPN Plan is Ready!";
 $messageNewPlan = <<<EOT
 <div style="background-color: #ffffff;">
-	<center><img src="https://www0.skylaski.com/media/pics/bannermedium.png" width="30%"><hr>
+	<center><img src="https://$SITE_DOMAIN/media/pics/bannermedium.png" width="30%"><hr>
 	<h1>Welcome to Skylaski VPN!</h1>
-	<h3>You can now <a href="https://www0.skylaski.com/sign-in/" target="_blank">login</a> and start managing your VPN Client(s).
+	<h3>You can now <a href="https://$SITE_DOMAIN/sign-in/" target="_blank">login</a> and start managing your VPN Client(s).
 		
 		<br><br><p>If this is your first VPN Plan, you might want to take a look at <a href="https://discourse.skylaski.com/t/getting-started-with-skylaski-vpn/" target="_blank">Getting Started</a>, or the <a href="https://discourse.skylaski.com/t/skylaski-vpn-faq-frequently-asked-questions/">FAQ</a></p>
 		
-<br><br><p>Next, check out our <a href="https://discourse.skylaski.com">Community</a> for even more information and support!</p><br><br>
+<br><br><p>Next, check out our <a href="https://$COMMUNITY_DOMAIN">Community</a> for even more information and support!</p><br><br>
 
-<p>Finall, follow us on Social Media to learn more about Privacy and Security online.</p>
+<p>Finally, follow us on Social Media to learn more about Privacy and Security online.</p>
 
-<a href="https://www.facebook.com/skylaskivpn" target="_blank"><img src="https://www0.skylaski.com/media/pics/social/icon-facebook-square-png-24x24.png"></a>
-<a href="https://www.instagram.com/skylaskivpn" target="_blank"><img src="https://www0.skylaski.com/media/pics/social/ig-1-24x24.jpg"></a>
-<a href="https://twitter.com/SkylaskiVPN" target="_blank"><img src="https://www0.skylaski.com/media/pics/social/iconfinder_twitter_173834-24x24.png"></a>
-<a href="https://www.minds.com/skylaskivpn/" target="_blank"><img src="https://www0.skylaski.com/media/pics/social/bulb-15x24.png"></a>
+<a href="https://www.facebook.com/skylaskivpn" target="_blank"><img src="https://$SITE_DOMAIN/media/pics/social/icon-facebook-square-png-24x24.png"></a>
+<a href="https://www.instagram.com/skylaskivpn" target="_blank"><img src="https://$SITE_DOMAIN/media/pics/social/ig-1-24x24.jpg"></a>
+<a href="https://twitter.com/SkylaskiVPN" target="_blank"><img src="https://$SITE_DOMAIN/media/pics/social/iconfinder_twitter_173834-24x24.png"></a>
+<a href="https://www.minds.com/skylaskivpn/" target="_blank"><img src="https://$SITE_DOMAIN/media/pics/social/bulb-15x24.png"></a>
+
 	
 <br><br><h1>Enjoy!</h1>
-<p><a href="https://www0.skylaski.com" target="_blank">Skylaski.com</a></p>
-<img src="https://www0.skylaski.com/media/pics/wingstiny.png" width="5%">
+<p><a href="https://$SITE_DOMAIN" target="_blank">Skylaski.com</a></p>
+<img src="https://$SITE_DOMAIN/media/pics/wingstiny.png" width="5%">
 	
 	
 	</center>
@@ -38,14 +40,14 @@ EOT;
 $subjectReferralConfirmed = "You're Skylaski.com Referral Reward is Here!";
 $messageReferralConfirmed = <<<EOT
 <div style="background-color: #ffffff;">
-	<center><img src="https://www0.skylaski.com/media/pics/bannermedium.png" width="30%"><hr>
+	<center><img src="https://$SITE_DOMAIN/media/pics/bannermedium.png" width="30%"><hr>
 	<h1>You've referred a friend to Skylaski.com!</h1>
 	<h3>We really appreciate your efforts! Have a free month of VPN services on us!
 		
 	
 <br><br><h1>Thank You!</h1>
-<p><a href="https://www0.skylaski.com" target="_blank">Skylaski.com</a></p>
-<img src="https://www0.skylaski.com/media/pics/wingstiny.png" width="5%">
+<p><a href="https://$SITE_DOMAIN" target="_blank">Skylaski.com</a></p>
+<img src="https://$SITE_DOMAIN/media/pics/wingstiny.png" width="5%">
 	
 	
 	</center>
@@ -56,13 +58,13 @@ EOT;
 $subjectRenewal = "You're Skylaski VPN Plan Has Been Renewed!";
 $messageRenewal = <<<EOT
 <div style="background-color: #ffffff;">
-	<center><img src="https://www0.skylaski.com/media/pics/bannermedium.png" width="30%"><hr>
+	<center><img src="https://$SITE_DOMAIN/media/pics/bannermedium.png" width="30%"><hr>
 	<h1>You've Renewed Your VPN Plan!</h1>
 	<h3>We appreciate your business!</h3>
 	
 <br><br><h1>Enjoy!</h1>
-<p><a href="https://www0.skylaski.com" target="_blank">Skylaski.com</a></p>
-<img src="https://www0.skylaski.com/media/pics/wingstiny.png" width="5%">
+<p><a href="https://$SITE_DOMAIN" target="_blank">Skylaski.com</a></p>
+<img src="https://$SITE_DOMAIN/media/pics/wingstiny.png" width="5%">
 	
 	
 	</center>
@@ -73,13 +75,13 @@ EOT;
 $subjectUpgrade = "You're Skylaski VPN Plan Has Been Upgraded!";
 $messageUpgrade = <<<EOT
 <div style="background-color: #ffffff;">
-	<center><img src="https://www0.skylaski.com/media/pics/bannermedium.png" width="30%"><hr>
+	<center><img src="https://$SITE_DOMAIN/media/pics/bannermedium.png" width="30%"><hr>
 	<h1>You've Upgraded Your VPN Plan!</h1>
 	<h3>You now have access to additional VPN clients. Congratulations!
 	
 <br><br><h1>Enjoy!</h1>
-<p><a href="https://www0.skylaski.com" target="_blank">Skylaski.com</a></p>
-<img src="https://www0.skylaski.com/media/pics/wingstiny.png" width="5%">
+<p><a href="https://$SITE_DOMAIN" target="_blank">Skylaski.com</a></p>
+<img src="https://$SITE_DOMAIN/media/pics/wingstiny.png" width="5%">
 	
 	
 	</center>
@@ -90,13 +92,13 @@ EOT;
 $subjectDelete = "You're Account at Skylaski VPN has been Deleted";
 $messageDelete = <<<EOT
 <div style="background-color: #ffffff;">
-	<center><img src="https://www0.skylaski.com/media/pics/bannermedium.png" width="30%"><hr>
+	<center><img src="https://$SITE_DOMAIN/media/pics/bannermedium.png" width="30%"><hr>
 	<h1>We've Deleted Your Account.</h1>
 	<h3>Sorry to see you go.</h3>
 	<p>If you'd like to provide us with some <a href="mailto:support@skylaski.com">feedback</a>, we'd greatly appreciate it!</p>	
 <br><br><h1>Thanks for Giving Us a Shot!</h1>
-<p><a href="https://www0.skylaski.com" target="_blank">Skylaski.com</a></p>
-<img src="https://www0.skylaski.com/media/pics/wingstiny.png" width="5%">
+<p><a href="https://$SITE_DOMAIN" target="_blank">Skylaski.com</a></p>
+<img src="https://$SITE_DOMAIN/media/pics/wingstiny.png" width="5%">
 	
 	
 	</center>
@@ -107,13 +109,29 @@ EOT;
 $subjectExpired = "You're Account at Skylaski VPN has Expired";
 $messageExpired = <<<EOT
 <div style="background-color: #ffffff;">
-	<center><img src="https://www0.skylaski.com/media/pics/bannermedium.png" width="30%"><hr>
+	<center><img src="https://$SITE_DOMAIN/media/pics/bannermedium.png" width="30%"><hr>
 	<h1>Your VPN Plan has Expired.</h1>
 	<h3>Sorry to see you go.</h3>
 	<p>If you'd like to provide us with some <a href="mailto:support@skylaski.com">feedback</a>, we'd greatly appreciate it!</p>	
 <br><br><h1>Thanks for Giving Us a Shot!</h1>
-<p><a href="https://www0.skylaski.com" target="_blank">Skylaski.com</a></p>
-<img src="https://www0.skylaski.com/media/pics/wingstiny.png" width="5%">
+<p><a href="https://$SITE_DOMAIN" target="_blank">Skylaski.com</a></p>
+<img src="https://$SITE_DOMAIN/media/pics/wingstiny.png" width="5%">
+	
+	
+	</center>
+	
+</div>
+EOT;
+
+$subjectMemberRemoved = "Your Group Membership Has Ended";
+$messageMemberRemoved = <<<EOT
+<div style="background-color: #ffffff;">
+	<center><img src="https://$SITE_DOMAIN/media/pics/bannermedium.png" width="30%"><hr>
+	<h3>Your group membership at Skylaski VPN has come to an end.</h3>
+	<p>If you're interested in an individual plan <a href="https://$SITE_DOMAIN/">visit us</a>!</p>
+	
+<p><a href="https://$SITE_DOMAIN" target="_blank">Skylaski.com</a></p>
+<img src="https://$SITE_DOMAIN/media/pics/wingstiny.png" width="5%">
 	
 	
 	</center>
@@ -128,23 +146,27 @@ function sendPlanEmail($to,$type) {
 	
 		case "NewPlan":
 			mail($to,$GLOBALS['subjectNewPlan'],$GLOBALS['messageNewPlan'],$GLOBALS['mailHeaders']);
-		break;
+			break;
 	
 		case "ReferralConfirmed":
 			mail($to,$GLOBALS['subjectReferralConfirmed'],$GLOBALS['messageReferralConfirmed'],$GLOBALS['mailHeaders']);
-		break;
+			break;
 		
 		case "Renew":
 			mail($to,$GLOBALS['subjectRenewal'],$GLOBALS['messageRenewal'],$GLOBALS['mailHeaders']);
-		break;
+			break;
 		
 		case "Upgrade":
 			mail($to,$GLOBALS['subjectUpgrade'],$GLOBALS['messageUpgrade'],$GLOBALS['mailHeaders']);
-		break;
+			break;
 		
 		case "Expired":
 			mail($to,$GLOBALS['subjectExpired'],$GLOBALS['messageExpired'],$GLOBALS['mailHeaders']);
-		break;
+			break;
+		
+		case "MemberRemoved":
+			mail($to,$GLOBALS['subjectMemberRemoved'],$GLOBALS['messageMemberRemoved'],$GLOBALS['mailHeaders']);
+			break;
 	}
 	
 }
@@ -153,12 +175,12 @@ function sendRenewalReminder($to,$days){
 	
 	$message = <<<EOT
 <div style="background-color: #ffffff;">
-	<center><img src="https://www0.skylaski.com/media/pics/bannermedium.png" width="30%"><hr>
+	<center><img src="https://$SITE_DOMAIN/media/pics/bannermedium.png" width="30%"><hr>
 <h3>Your VPN Plan is About to Expire!</h3>
 <p>You have $days days remaining on your current plan.</p>
-<p>Visit your <a href="https://www0.skylaski.com/sign-in/">Profile</a> to upgrade or renew your plan!</p>
-<p><a href="https://www.skylaski.com" target="_blank">Skylaski.com</a></p>
-<img src="https://www0.skylaski.com/media/pics/wingstiny.png" width="5%">
+<p>Visit your <a href="https://$SITE_DOMAIN/sign-in/">Profile</a> to upgrade or renew your plan!</p>
+<p><a href="https://$SITE_DOMAIN" target="_blank">Skylaski.com</a></p>
+<img src="https://$SITE_DOMAIN/media/pics/wingstiny.png" width="5%">
 </center>
 </div>
 	
@@ -212,7 +234,7 @@ function sendReceiptEmail($to,$type,$checkoutid,$db_conn){
 }
 </style>
 <div style="background-color: #ffffff;">
-	<center><img src="https://www.skylaski.com/forum/styles/basic_red/theme/images/logo.png" width="30%"><hr>
+	<center><img src="https://$SITE_DOMAIN/forum/styles/basic_red/theme/images/logo.png" width="30%"><hr>
 <p>Here is a receipt for your purchase.</p>
 <table id="invoice">
   <tr>
@@ -237,8 +259,8 @@ function sendReceiptEmail($to,$type,$checkoutid,$db_conn){
   </tr>
 </table>
 <br><br><h1>Enjoy!</h1>
-<p><a href="https://www.skylaski.com" target="_blank">Skylaski.com</a></p>
-<img src="https://www.skylaski.com/wp-content/uploads/2020/05/cropped-Matt-Wings-04.png" width="5%">
+<p><a href="https://$SITE_DOMAIN" target="_blank">Skylaski.com</a></p>
+<img src="https://$SITE_DOMAIN/wp-content/uploads/2020/05/cropped-Matt-Wings-04.png" width="5%">
 </center>
 </div>
 	
@@ -248,14 +270,16 @@ EOT;
 	
 
 }
-/*		
+
+/*	
 if(isset($_GET['test'])){
 	
 	//mail("mpoletiek@skylaski.com",$GLOBALS['subjectRenewal'],$GLOBALS['messageRenewal'],$GLOBALS['mailHeaders']);
 	
 	sendDeleteEmail("mpoletiek@skylaski.com");
 	
-}*/	
+}
+*/	
 		
 		
 ?>
