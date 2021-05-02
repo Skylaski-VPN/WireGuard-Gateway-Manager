@@ -1,0 +1,5 @@
+[Interface]
+SaveConfig = true
+Address = <IPV4><V4MASK>,<IPV6><V6MASK>
+ListenPort = <LISTENPORT>
+PrivateKey = <PRIVATEKEY>
