@@ -43,6 +43,7 @@ else{
 // Now we have a token to check. 
 require '../include/config.php';
 require '../include/include.php';
+require '../include/commands.php';
 require '../include/wgm_include.php';
 
 $wgm_db = pg_connect( "$db_host $db_port $db_name $db_credentials" );
@@ -165,7 +166,7 @@ switch ($data->cmd){
 					exit();
 				}
 				while($client = pg_fetch_assoc($get_user_clients_ret)){
-					deleteClient($client['local_uid'],$wgm_db);
+					deleteClient($client['local_uid'],$wgm_db,$PATH_TO_CLI);
 				}
 				
 				// Delete user

@@ -319,7 +319,7 @@ switch ($data->cmd){
 		// Get Plans with same users, more clients
 		$get_more_clients_sql = "SELECT * FROM products WHERE total_users=".pg_escape_string($plan['total_users']);
 		$get_more_clients_ret = pg_query($pos_db,$get_more_clients_sql);
-		while($more_clients_plan = pg_fetch_assoc()){
+		while($more_clients_plan = pg_fetch_assoc($get_more_clients_ret)){
 			array_push($upgrade_plans,$more_clients_plan);
 		}
 	
