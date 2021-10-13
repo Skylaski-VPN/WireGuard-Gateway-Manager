@@ -8,6 +8,9 @@ wgm/cli/wgm_db/config.ini
 # temp files
 wgm/cli/tmp/
 
+#usage stats
+wmg/usage/
+
 # Ignore hide
 hide/
 
