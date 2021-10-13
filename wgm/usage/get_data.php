@@ -17,6 +17,14 @@ if(!$wgm_db){
 	//http_response_code(400);
 	exit();
 }
+$pos_db = pg_connect( "$db_host $db_port dbname = skylaski_pos $db_credentials" );
+if(!$pos_db){
+	$returnArray['message']='Encountered an Error';
+	error_log("Encountered an Error");
+	echo json_encode($returnArray);
+	//http_response_code(400);
+	exit();
+}
 
 function formatDate($date_string) {
 	// Set an expiration date on the ovpn plan
@@ -31,6 +39,103 @@ function formatDate($date_string) {
 }
 
 switch($chart){
+	case 'newsigninsmom':
+		$get_newsigninsmom_sql = "SELECT to_char(date_trunc('month',updated_at), 'YYYY-MM-dd') as month,count(id) as count FROM users GROUP BY month ORDER BY month ASC";
+		$get_newsigninsmom_ret = pg_query($wgm_db,$get_newsigninsmom_sql);
+		
+		$data = array ( 'cols' => array( array('id' => '', 'label' => 'month', 'pattern' => '', 'type' => 'string'), array('id' => '', 'label' => 'count', 'pattern' => '', 'type' => 'number') ), 'rows' => [] );
+		
+		while($row = pg_fetch_assoc($get_newsigninsmom_ret)){
+			
+			$month = $row['month'];
+			$count = $row['count'];
+			//error_log("Month: $month, SUM: $sum");
+			
+			$rowArray = array( 'c' => [] );
+			$monthArray = array( 'v' => $month, 'f' => null);
+			$countArray = array( 'v' => $count, 'f' => null);
+			
+			array_push($rowArray['c'], $monthArray);
+			array_push($rowArray['c'], $countArray);
+			array_push($data['rows'], $rowArray);
+		}
+		
+		$json = json_encode($data);
+		
+		header('Content-type: application/json');
+		print $json;
+		
+		pg_close($pos_db);
+		pg_close($wgm_db);
+	
+		//exit();
+		break;
+		
+	case 'totalmom':
+		$get_totalmom_sql = "SELECT to_char(date_trunc('month',updated_at), 'YYYY-MM-dd') as month,sum(subtotal) as sum FROM active_plans GROUP BY month ORDER BY month ASC";
+		$get_totalmom_ret = pg_query($pos_db,$get_totalmom_sql);
+		
+		$data = array ( 'cols' => array( array('id' => '', 'label' => 'month', 'pattern' => '', 'type' => 'string'), array('id' => '', 'label' => 'sum', 'pattern' => '', 'type' => 'number') ), 'rows' => [] );
+		
+		while($row = pg_fetch_assoc($get_totalmom_ret)){
+			
+			$month = $row['month'];
+			$sum = $row['sum'];
+			$fSum = "$".$sum;
+			//error_log("Month: $month, SUM: $sum");
+			
+			$rowArray = array( 'c' => [] );
+			$monthArray = array( 'v' => $month, 'f' => null);
+			$sumArray = array( 'v' => $sum, 'f' => $fSum);
+			
+			array_push($rowArray['c'], $monthArray);
+			array_push($rowArray['c'], $sumArray);
+			array_push($data['rows'], $rowArray);
+		}
+		
+		$json = json_encode($data);
+		
+		header('Content-type: application/json');
+		print $json;
+		
+		pg_close($pos_db);
+		pg_close($wgm_db);
+	
+		//exit();
+		break;
+		
+	case 'totalcountmom':
+		$get_totalcountmom_sql = "SELECT to_char(date_trunc('month',updated_at), 'YYYY-MM-dd') as month,count(id) as count FROM active_plans GROUP BY month ORDER BY month ASC";
+		$get_totalcountmom_ret = pg_query($pos_db,$get_totalcountmom_sql);
+		
+		$data = array ( 'cols' => array( array('id' => '', 'label' => 'month', 'pattern' => '', 'type' => 'string'), array('id' => '', 'label' => 'count', 'pattern' => '', 'type' => 'number') ), 'rows' => [] );
+		
+		while($row = pg_fetch_assoc($get_totalcountmom_ret)){
+			
+			$month = $row['month'];
+			$count = $row['count'];
+			//error_log("Month: $month, SUM: $sum");
+			
+			$rowArray = array( 'c' => [] );
+			$monthArray = array( 'v' => $month, 'f' => null);
+			$countArray = array( 'v' => $count, 'f' => null);
+			
+			array_push($rowArray['c'], $monthArray);
+			array_push($rowArray['c'], $countArray);
+			array_push($data['rows'], $rowArray);
+		}
+		
+		$json = json_encode($data);
+		
+		header('Content-type: application/json');
+		print $json;
+		
+		pg_close($pos_db);
+		pg_close($wgm_db);
+	
+		//exit();
+		break;
+		
 	case 'curusagemap':
 		$get_locations_cur_connected_sql = "SELECT location,SUM(still_connected) as still_connected FROM usage WHERE date_trunc('hour',created_at)='".pg_escape_string($cur_date)."' AND still_connected > 0 GROUP BY location";
 		//error_log($get_locations_cur_connected_sql);
@@ -61,7 +166,9 @@ switch($chart){
 		header('Content-type: application/json');
 		print $json;
 
+		pg_close($pos_db);
 		pg_close($wgm_db);
+		
 		exit();
 		break;
 		
@@ -95,6 +202,7 @@ switch($chart){
 		header('Content-type: application/json');
 		print $json;
 
+		pg_close($pos_db);
 		pg_close($wgm_db);
 		exit();
 		break;
