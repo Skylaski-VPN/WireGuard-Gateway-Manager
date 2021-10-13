@@ -9,7 +9,7 @@ wgm/cli/wgm_db/config.ini
 wgm/cli/tmp/
 
 #usage stats
-wmg/usage/
+wmg/usage
 
 # Ignore hide
 hide/
