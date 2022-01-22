@@ -233,7 +233,7 @@ def attach_gw(gw,loc):
 	
 	# Make sure WireGuard starts at boot
 	systemd_cmd = 'ssh %s %s@%s "systemctl enable wg-quick@wg0"' % (SSH_OPTS, SSH_USER, get_gw_ret['pub_ipv4_addr'])
-	p = subprocess.Popen(start_wg_cmd,shell=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+	p = subprocess.Popen(systemd_cmd,shell=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
 	systemd_out = p.communicate()[1]
 
 	# Update GW in database with port, ipv4, ipv6, and public key
